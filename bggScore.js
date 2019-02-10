@@ -7,7 +7,7 @@ function promiseGet(path) {
             console.log("XHR READY STATE: "+xhr.readyState);
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    resolve(xhr.responseText);
+                    resolve(xhr.responseXML);
                 } else {
                     resolve(xhr.status+": "+xhr.statusText);
                 }
@@ -45,21 +45,24 @@ function updateWidget(score, name) {
     document.querySelector(".bgg_widget_name").innerHTML = name;
 }
 
-injectWidget();
-setLoader(true);
-let parser = new DOMParser();
-let xmlSearchDoc = await promiseGet("https://api.geekdo.com/xmlapi2/search?query="+encodeURI(document.querySelector(".product-name").innerHTML));
-let xmlSearchDoc = parser.parseFromString(xmlSearchDoc, 'text/xml');
-if (xmlSearchDoc.getElementsByTagName("item")[0]) {
-    let id = xmlSearchDoc.getElementsByTagName("item")[0].getAttribute("id");
-    console.log("ID: "+id);
-    let xmlScoreDoc = await promiseGet("https://api.geekdo.com/xmlapi2/thing?id="+id+"&stats=1");
-    xmlScoreDoc = parser.parseFromString(xmlScoreDoc, 'text/xml');
-    let name = xmlScoreDoc.getElementsByTagName("name")[0].getAttribute("value");
-    let score = Math.round(parseInt(xmlScoreDoc.getElementsByTagName("average")[0].getAttribute("value")) * 10 ) / 10;
-    updateWidget(score,name);
-    setLoader(false);
-} else {
-    console.log("Item not found on board game geek");
+async function processRequest() {
+    injectWidget();
+    setLoader(true);
+    let parser = new DOMParser();
+    let xmlSearchDoc = await promiseGet("https://api.geekdo.com/xmlapi2/search?query="+encodeURI(document.querySelector(".product-name").innerHTML));
+    if (xmlSearchDoc.getElementsByTagName("item")[0]) {
+        let id = xmlSearchDoc.getElementsByTagName("item")[0].getAttribute("id");
+        console.log("ID: "+id);
+        let xmlScoreDoc = await promiseGet("https://api.geekdo.com/xmlapi2/thing?id="+id+"&stats=1");
+        let name = xmlScoreDoc.getElementsByTagName("name")[0].getAttribute("value");
+        let score = Math.round(xmlScoreDoc.getElementsByTagName("average")[0].getAttribute("value") *10) /10;
+        updateWidget(score,name);
+        setLoader(false);
+    } else {
+        console.log("Item not found on board game geek");
+    }
 }
+
+processRequest();
+
     
