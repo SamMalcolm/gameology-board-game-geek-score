@@ -1,0 +1,20 @@
+{
+
+    "manifest_version": 2,
+    "name": "Gameology Board Game Geek Score",
+    "version": "1.0",
+  
+    "description": "Attempts to find the Board Game Geek score for a board game on gameology and add it to the DOM",
+  
+    "icons": {
+      "48": "icons/ff-icon.png"
+    },
+  
+    "content_scripts": [
+      {
+        "matches": ["*://*.gameology.com.au/collections/board-game/products/*"],
+        "js": ["bggScore.js"]
+      }
+    ]
+  
+  }
